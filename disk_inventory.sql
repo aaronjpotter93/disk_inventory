@@ -1,9 +1,9 @@
 /************************************************************************************/
-/* Date				Programmer			Description									*/
+/* Date			Programmer			Description									*/
 /*																					*/
-/* 3/4/2022			Aaron Potter		Initial creation of disk database			*/
-/* 3/11/2022		Aaron Poter			Add insert statements.						*/	
-/*																					*/
+/* 3/4/2022		Aaron Potter		Initial creation of disk database			*/
+/* 3/11/2022		Aaron Poter		Add INSERT statements.						*/	
+/* 3/18/2022		Aaron Potter		Add report statements						*/
 /*																					*/
 /************************************************************************************/
 use master;
@@ -58,9 +58,9 @@ CREATE TABLE disk_has_borrower (
 	borrowed_date			DATETIME2 NOT NULL,
 	returned_date			DATETIME2 NULL
 );
-/****** END OF PROJECT 1 ******/
+/****** END OF PROJECT 2 ******/
 
-/*** START OF PROJECT 2***/
+/*** START OF PROJECT 3***/
 /***Insert Statements ***/
 
 --Insert data into disk_type
@@ -132,10 +132,10 @@ WHERE fname = 'Teemo';
 INSERT disk
 	(disk_name, release_date, genre_id, status_id, disk_type_id)
 VALUES -- Needs at least 20 real world albums
-('An Awesome Wave','1/1/2012', 11, 2, 1),
-('This Is All Yours','1/2/2014', 11, 2, 1),
-('RELAXER','1/3/2017', 11, 2, 1),
-('The Dream','12/11/2022', 11, 2, 1),
+('An Awesome Wave','1/1/2012', 11, 2, 2),
+('This Is All Yours','1/2/2014', 11, 2, 2),
+('RELAXER','1/3/2017', 11, 2, 2),
+('The Dream','12/11/2022', 11, 2, 2),
 ('WHEN WE ALL FALL ASLEEP, WHERE DO WE GO?', '1/5/2019', 11, 2, 1),
 ('Happier Than Ever','1/6/2021', 11, 1, 1),
 ('Inside','1/7/2021', 26, 1, 1),
@@ -145,9 +145,9 @@ VALUES -- Needs at least 20 real world albums
 ('Armistice','1/11/2009', 11, 2, 1),
 ('Odd Soul','1/12/2011', 11, 2, 1),
 ('Vitals','1/13/2015', 11, 1, 1),
-('Parachutes','1/14/2000', 1, 5, 1),
-('A Rush of Blood to the Head','1/15/2002', 1, 1, 1),
-('X&Y','1/16/2005', 1, 1, 1),
+('Parachutes','1/14/2000', 1, 5, 3),
+('A Rush of Blood to the Head','1/15/2002', 1, 1, 3),
+('X&Y','1/16/2005', 1, 1, 3),
 ('Viva La Vida','1/17/2008', 1, 2, 1),
 ('Vampire Weekend','1/18/2008', 11, 1, 1),
 ('Modern Vampires of the City','1/19/2013', 11, 1, 1),
@@ -190,3 +190,73 @@ SELECT borrower_id as Borrower_id, disk_id as Disk_id,
 	CAST(borrowed_date as date) as Borrowed_date, returned_date as Return_date
 FROM disk_has_borrower
 WHERE returned_date  IS NULL;
+
+/****** END OF PROJECT 3 ******/
+
+/*** START OF PROJECT 4 ***/
+-- 1. Show all disks in your database, the type, & status. Sample Output:
+SELECT 'Disk Name' = disk_name, 'Release Date' = CONVERT(varchar, release_date, 101), 
+	'Type' = disk_type.description, 'Genre' = genre.description,
+	'Status' = status.description
+FROM Disk
+JOIN disk_type
+	ON disk.disk_type_id = disk_type.disk_type_id 
+JOIN genre
+	ON disk.genre_id =  genre.genre_id
+JOIN status
+	ON disk.status_id = status.status_id
+ORDER BY disk_name;
+
+-- 2. Show all borrowed disks and who borrowed them. Sample Output:
+SELECT 'Last' = lname, 'First' = fname, 'Disk Name' = disk_name, 
+	'Borrowed Date' = CAST(borrowed_date AS date), 'Returned Date' = CAST(returned_date AS date)
+FROM disk_has_borrower
+JOIN borrower 
+	ON disk_has_borrower.borrower_id = borrower.borrower_id
+JOIN disk
+	ON disk_has_borrower.disk_id = disk.disk_id
+ORDER BY lname;
+
+-- 3. Show the disks that have been borrowed more than once. Sample Output:
+SELECT 'Disk Name' = disk_name, 'Times Borrowed' = COUNT(*)
+FROM disk_has_borrower
+JOIN disk
+	ON disk_has_borrower.disk_id = disk.disk_id
+GROUP BY disk_name
+HAVING COUNT (*) > 1
+ORDER BY disk_name
+
+-- 4. Show the disks outstanding or on-loan and who took each disk. Sample Output:
+SELECT 'Disk Name' = disk_name, 'Borrowed' = CAST(borrowed_date AS date), 
+	'Returned' = returned_date, 'Last Name' = lname, 'First Name' = fname
+FROM disk
+JOIN disk_has_borrower
+	ON disk.disk_id = disk_has_borrower.disk_id
+JOIN borrower
+	ON borrower.borrower_id = disk_has_borrower.borrower_id
+WHERE returned_date IS NULL
+ORDER BY disk_name
+
+GO
+
+-- 5. Create a view called View_Borrower_No_Loans that shows the borrowers who have not borrowed a disk. Include the borrower id in the view definition but do not display the id in your output. Sample Output:
+CREATE VIEW View_Borrower_No_Loans
+AS
+SELECT borrower_id, lname, fname
+FROM borrower
+WHERE borrower_id NOT IN
+	(SELECT DISTINCT borrower_id
+	FROM disk_has_borrower);
+GO
+SELECT 'Last Name' = lname, 'First Name' = fname
+FROM View_Borrower_No_Loans
+ORDER BY lname, fname;
+
+-- 6. Show the borrowers who have borrowed more than 1 disk. Sample Output:
+SELECT 'Last Name' = lname, 'First Name' = fname, 'Disks Borrowed' = COUNT(DISTINCT disk_id) 
+FROM disk_has_borrower
+JOIN borrower
+	ON borrower.borrower_id = disk_has_borrower.borrower_id
+GROUP BY lname, fname
+HAVING COUNT(*) > 1
+ORDER BY lname, fname
