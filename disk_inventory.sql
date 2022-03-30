@@ -1,10 +1,13 @@
 /************************************************************************************/
-/* Date			Programmer		Description									*/
+/* Date				Programmer			Description									*/
 /*																					*/
-/* 3/4/2022		Aaron Potter		Initial creation of disk database			*/
-/* 3/11/2022		Aaron Poter		Add INSERT statements.						*/	
+/* 3/4/2022			Aaron Potter		Initial creation of disk database			*/
+/* 3/11/2022		Aaron Poter			Add INSERT statements.						*/	
 /* 3/18/2022		Aaron Potter		Add report statements						*/
-/* 3/28/2022		Aaron Potter		Add stored procedures																					*/
+/* 3/28/2022		Aaron Potter		Adding stored procedures to ins &			*/
+/*										update disk_has_borrower					*/						
+/* 3/30/2022		Aaron Potter		Add sp's to ins, upd &						*/
+/*										del borrower & disk							*/
 /*																					*/
 /************************************************************************************/
 use master;
@@ -322,3 +325,166 @@ GO
 
 
 GRANT EXEC ON sp_upd_disk_has_borrower TO diskUserap
+
+
+/******* START OF PROJECT 5 *******/
+DROP PROC IF EXISTS sp_ins_disk
+GO
+-- Creating Stored Procedure to Insert Disk Data
+CREATE PROC sp_ins_disk
+	@disk_name nvarchar(60), @release_date date, @genre_id 
+	int, @status_id int, @disk_type_id int
+AS
+	BEGIN TRY
+		INSERT disk
+		(disk_name, release_date, genre_id, status_id, disk_type_id)
+		VALUES
+		(@disk_name, @release_date, @genre_id, @status_id, @disk_type_id)
+		;
+	END TRY
+	BEGIN CATCH
+		PRINT 'An Error Occured.';
+		PRINT 'Message: ' + CONVERT(VARCHAR(200), ERROR_MESSAGE());
+	END CATCH
+GO
+
+-- Add Grant Permissions
+GRANT EXECUTE ON sp_ins_disk TO diskUserap;
+GO			-- Updates Without Error
+EXEC sp_ins_disk 'Shelter', '2/2/2018', 4, 1, 1
+GO			-- Controlled Error
+EXEC sp_ins_disk 'Shelter', '2/2/2018', 4, 1, NULL
+GO
+DROP PROC IF EXISTS sp_upd_disk
+GO
+
+-- Creating Stored Procedure to Update an Existing Disk's Data
+CREATE PROC sp_upd_disk
+	@disk_id int, @disk_name nvarchar(60), @release_date
+	date, @genre_id int, @status_id int,
+	@disk_type_id int
+AS
+	BEGIN TRY
+		UPDATE disk
+		SET disk_name = @disk_name,
+			release_date = @release_date,
+			genre_id = @genre_id,
+			status_id = @status_id,
+			disk_type_id = @disk_type_id
+		WHERE disk_id = @disk_id;
+	END TRY
+	BEGIN CATCH
+		PRINT 'An Error Occured.';
+		PRINT 'Message: ' + CONVERT(VARCHAR(200), ERROR_MESSAGE());
+	END CATCH
+GO
+
+-- Add Grant Permissions
+GRANT EXECUTE ON sp_upd_disk TO diskUserap;
+GO
+EXEC sp_upd_disk 22, 'Shelter', '3/3/2018', 5, 4, 3
+GO		-- Updates Without Error
+EXEC sp_upd_disk 22, 'Shelter', '3/3/2018', 5, 4, NULL
+GO		-- Controlled Error
+
+DROP PROC IF EXISTS sp_del_disk;
+GO
+-- Creating Stored Procedure to Delete Disks
+CREATE PROC sp_del_disk
+@disk_id int
+AS
+	BEGIN TRY
+		DELETE FROM disk
+			WHERE disk_id = @disk_id;
+	END TRY
+	BEGIN CATCH
+		PRINT 'An Error Occured.';
+		PRINT 'Message: ' + CONVERT(VARCHAR(200), ERROR_MESSAGE());
+	END CATCH
+GO
+
+-- Add Grant Permissions
+GRANT EXECUTE ON sp_del_disk TO diskUserap;
+GO
+EXEC sp_del_disk 22; -- Deletes Without Error
+EXEC sp_del_disk 21; -- Controlled Error
+
+
+--Insert, Update and Delete Stored Procedures Table Borrower
+DROP PROC IF EXISTS sp_ins_borrower
+GO
+-- Creating Stored Procedure to Insert Borrower Data
+CREATE PROC sp_ins_borrower
+	@fname nvarchar(60), @lname nvarchar(60), @phone_num varchar(150)
+AS
+	BEGIN TRY
+		INSERT borrower
+		(fname, lname, phone_num)
+		VALUES
+		(@fname, @lname, @phone_num)
+		;
+	END TRY
+	BEGIN CATCH
+		PRINT 'An Error Occured.';
+		PRINT 'Message: ' + CONVERT(VARCHAR(200), ERROR_MESSAGE());
+	END CATCH
+GO
+
+-- Add Grant Permissions
+GRANT EXECUTE ON sp_ins_borrower TO diskUserap;
+GO			-- Updates Without Error
+EXEC sp_ins_borrower 'Aaron', 'Potter', '789-221-5444'
+GO			-- Controlled Error
+EXEC sp_ins_borrower 'Aaron', 'Potter', NULL
+GO
+DROP PROC IF EXISTS sp_upd_borrower
+GO
+
+-- Creating Stored Procedure to Update an Existing Borrower's Data
+CREATE PROC sp_upd_borrower
+	@borrower_id int, @fname nvarchar(60), @lname nvarchar(60), @phone_num varchar(150)
+AS
+	BEGIN TRY
+		UPDATE borrower
+		SET fname = @fname,
+			lname = @lname,
+			phone_num = @phone_num
+		WHERE borrower_id = @borrower_id;
+	END TRY
+	BEGIN CATCH
+		PRINT 'An Error Occured.';
+		PRINT 'Message: ' + CONVERT(VARCHAR(200), ERROR_MESSAGE());
+	END CATCH
+GO
+
+-- Add Grant Permissions
+GRANT EXECUTE ON sp_upd_borrower TO diskUserap;
+GO
+EXEC sp_upd_borrower 24, 'Mr.', 'Warner', '834-838-9719'
+GO		-- Updates Without Error
+EXEC sp_upd_borrower 24, 'Mr.', 'Warner',  NULL
+GO		-- Controlled Error
+
+DROP PROC IF EXISTS sp_del_borrower;
+GO
+-- Creating Stored Procedure to Delete Borrowers
+CREATE PROC sp_del_borrower
+@borrower_id int
+AS
+	BEGIN TRY
+		DELETE FROM borrower
+			WHERE borrower_id = @borrower_id;
+	END TRY
+	BEGIN CATCH
+		PRINT 'An Error Occured.';
+		PRINT 'Message: ' + CONVERT(VARCHAR(200), ERROR_MESSAGE());
+	END CATCH
+GO
+
+-- Add Grant Permissions
+GRANT EXECUTE ON sp_del_borrower TO diskUserap;
+GO
+EXEC sp_del_borrower 24; -- Deletes Without Error
+EXEC sp_del_borrower 22; -- Controlled Error
+
+/******* END OF PROJECT 5 *******/
