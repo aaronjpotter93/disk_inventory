@@ -326,6 +326,7 @@ GO
 
 GRANT EXEC ON sp_upd_disk_has_borrower TO diskUserap
 
+/******* END OF CHAPTER 15 LAB *******/
 
 /******* START OF PROJECT 5 *******/
 DROP PROC IF EXISTS sp_ins_disk
