@@ -1,9 +1,10 @@
 /************************************************************************************/
-/* Date			Programmer			Description									*/
+/* Date			Programmer		Description									*/
 /*																					*/
 /* 3/4/2022		Aaron Potter		Initial creation of disk database			*/
 /* 3/11/2022		Aaron Poter		Add INSERT statements.						*/	
 /* 3/18/2022		Aaron Potter		Add report statements						*/
+/* 3/28/2022		Aaron Potter		Add stored procedures																					*/
 /*																					*/
 /************************************************************************************/
 use master;
@@ -260,3 +261,64 @@ JOIN borrower
 GROUP BY lname, fname
 HAVING COUNT(*) > 1
 ORDER BY lname, fname
+
+
+/****** END OF PROJECT 4 *******/
+
+-- Chapter 15 Lab
+use disk_inventoryap;
+
+DROP PROC IF EXISTS sp_ins_disk_has_borrower;
+GO
+CREATE PROC sp_ins_disk_has_borrower
+	@borrower_id int, @disk_id int, @borrowed_date datetime2, @returned_date datetime2 = NULL
+AS
+BEGIN TRY
+	INSERT disk_has_borrower
+		(borrower_id, disk_id, borrowed_date, returned_date)
+	VALUES
+		(@borrower_id, @disk_id, @borrowed_date, @returned_date);
+END TRY
+BEGIN CATCH
+	PRINT 'An Error Occurred';
+	PRINT 'Message: ' + CONVERT(VARCHAR(200), ERROR_MESSAGE());
+END CATCH
+GO
+GRANT EXEC ON sp_ins_disk_has_borrower TO diskUserap
+GO
+sp_ins_disk_has_borrower 2, 3, '3-27-22', '3-28-2022'
+GO
+sp_ins_disk_has_borrower 4, 4, '3-27-22'
+GO
+--Throws error
+sp_ins_disk_has_borrower 4, 44, '3-27-22'
+GO
+
+DROP PROC IF EXISTS sp_upd_disk_has_borrower;
+GO
+CREATE PROC sp_upd_disk_has_borrower
+	@disk_has_borrower_id int, @borrower_id int, @disk_id
+	int, @borrowed_date datetime2, @returned_date
+	datetime2= NULL
+AS
+BEGIN TRY
+	UPDATE disk_has_borrower
+	SET borrower_id = @borrower_id,
+		disk_id = @disk_id,
+		borrowed_date = @borrowed_date,
+		returned_date = @returned_date
+	WHERE disk_has_borrower_id = @disk_has_borrower_id;
+END TRY
+BEGIN CATCH
+	PRINT 'An Error Occurred';
+	PRINT 'Message: ' + CONVERT(VARCHAR(200), ERROR_MESSAGE());
+END CATCH
+GO
+
+sp_upd_disk_has_borrower 24, 2, 3, '3-3-2022', '3-22-2022';
+GO
+sp_upd_disk_has_borrower 24, 80, 3, '3-3-2022', '3-22-2022';
+GO
+
+
+GRANT EXEC ON sp_upd_disk_has_borrower TO diskUserap
