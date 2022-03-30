@@ -1,15 +1,15 @@
-/************************************************************************************/
-/* Date				Programmer			Description									*/
-/*																					*/
-/* 3/4/2022			Aaron Potter		Initial creation of disk database			*/
-/* 3/11/2022		Aaron Poter			Add INSERT statements.						*/	
-/* 3/18/2022		Aaron Potter		Add report statements						*/
-/* 3/28/2022		Aaron Potter		Adding stored procedures to ins &			*/
-/*										update disk_has_borrower					*/						
-/* 3/30/2022		Aaron Potter		Add sp's to ins, upd &						*/
-/*										del borrower & disk							*/
-/*																					*/
-/************************************************************************************/
+/*******************************************************************************************/
+/* Date			Programmer		Description				   */
+/*			  								   */
+/* 3/4/2022		Aaron Potter		Initial creation of disk database	   */
+/* 3/11/2022		Aaron Poter		Add INSERT statements.			   */	
+/* 3/18/2022		Aaron Potter		Add report statements			   */
+/* 3/28/2022		Aaron Potter		Adding stored procedures to ins &	   */
+/*						update disk_has_borrower		   */						
+/* 3/30/2022		Aaron Potter		Add sp's to ins, upd &			   */
+/*						del borrower & disk			   */
+/*				  							   */
+/*******************************************************************************************/
 use master;
 go
 DROP DATABASE IF EXISTS disk_inventoryap;
